@@ -9,7 +9,7 @@ app.use(express.json());
 
 // MONGODB
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://sazolsarker1:hspun2ClsZYUYx6V@cluster0.uomr8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true";
 
@@ -49,6 +49,22 @@ async function run() {
       // console.log(result);
       res.send(result);
     });
+
+    // DELETE API
+    app.delete('/users/:id',async(req,res)=>{
+      const id=req.params.id;
+      console.log("Received id client to server=>",id);
+
+      // hit the server with DELETE
+      const query ={_id: new ObjectId(id)}
+      const result = await userCollection.deleteOne(query);
+      // response to client after delete
+      res.send(result)
+    })
+
+
+
+    // *******************
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
