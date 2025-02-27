@@ -33,11 +33,20 @@ async function run() {
 
     // ALL client-server-DB APIs goes here
     // GET read API
-    app.get('/users',async(req,res)=>{
-      const cursor=userCollection.find()
-      const result=await cursor.toArray()
-      res.send(result)
-    })
+    app.get("/users", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Get specific user data from mongodb for PUT update
+    app.get("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("Get id=> ", id);
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
 
     // POST create api
     app.post("/user", async (req, res) => {
@@ -51,18 +60,40 @@ async function run() {
     });
 
     // DELETE API
-    app.delete('/users/:id',async(req,res)=>{
-      const id=req.params.id;
-      console.log("Received id client to server=>",id);
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("Received id client to server=>", id);
 
       // hit the server with DELETE
-      const query ={_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
       // response to client after delete
-      res.send(result)
-    })
+      res.send(result);
+    });
 
+    // PUT update specific user data
+    app.put("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const user = req.body;
 
+      // PUT api
+      const filter = { _id: new ObjectId(id) };
+      /* Set the upsert option to insert a document if no documents match
+    the filter */
+      const options = { upsert: true };
+
+      const userData = {
+        $set: {
+          name: user.name,
+          email: user.email,
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, userData, options);
+
+      // response to client
+      res.send(result);
+    });
 
     // *******************
 
